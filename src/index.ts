@@ -1,23 +1,24 @@
-import express from "express";
-import cors from "cors";
-import { authRouter } from "./auth";
-import { usersRouter } from "./users";
-import { notesRouter } from "./notes";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+import { app } from "./api/server";
 import { config } from "./config";
+import { logger } from "./utility/logger";
 
-const app = express();
+logger.info(`Starting HTTP server on port ${config.port} ...`);
 
-app.use(express.json());
-app.use(cors({ origin: "*", credentials: true }));
-
-app.use("/auth", authRouter);
-app.use("/users", usersRouter);
-app.use("/notes", notesRouter);
-
-app.use((err: any, req: any, res: any, next: any) => {
-  res.status(500).json({ error: err.message, stack: err.stack });
+const server = app.listen(config.port, () => {
+  logger.info(`HTTP server is running on port ${config.port}`);
 });
 
-app.listen(config.port, () => {
-  console.log(`listening on ${config.port}`);
-});
+const shutdown = (signal: string) => {
+  logger.info(`Shutting down HTTP server (${signal}) ...`);
+  server.close(() => {
+    process.exit(0);
+  });
+};
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
