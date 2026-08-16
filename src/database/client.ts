@@ -3,7 +3,7 @@
 // no prebuilt binary, and node-gyp rebuild needs the Visual Studio
 // "Desktop development with C++" workload. Using Node built-in sqlite instead.
 import { DatabaseSync } from "node:sqlite";
-import { config } from "../config";
+import { config } from "../utility/config";
 import { hashPassword } from "../utility/password";
 
 export const db = new DatabaseSync(config.dbPath);

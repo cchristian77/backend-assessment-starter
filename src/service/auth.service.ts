@@ -1,6 +1,6 @@
 // CODE REVIEW #2: Domain, Controller, Service, Repository Layer
 import jwt from "jsonwebtoken";
-import { config } from "../config";
+import { config } from "../utility/config";
 import UserRepository from "../repository/user.repository";
 import Errors from "../utility/errors";
 import { LoginRequest } from "../controller/request/auth.request";

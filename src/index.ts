@@ -1,11 +1,10 @@
 import dotenv from "dotenv";
 import path from "path";
+import { app } from "./api/server";
+import { logger } from "./utility/logger";
+import { config } from "./utility/config";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
-
-import { app } from "./api/server";
-import { config } from "./config";
-import { logger } from "./utility/logger";
 
 logger.info(`Starting HTTP server on port ${config.port} ...`);
 
