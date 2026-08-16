@@ -1,6 +1,5 @@
 // CODE REVIEW #2: Domain, Controller, Service, Repository Layer
 import NoteRepository from "../repository/note.repository";
-import Errors from "../utility/errors";
 import { CreateNoteRequest } from "../controller/request/note.request";
 import { NoteResponse } from "../controller/response/note.response";
 import { logger } from "../utility/logger";
@@ -13,7 +12,7 @@ export default class NoteService {
     logger.info(`List notes with req: ${JSON.stringify({ userId })}`);
 
     try {
-      const notes = noteRepository.findAll(userId);
+      const notes = noteRepository.findAllByUserId(userId);
       return notes.map(
         (note) => new NoteResponse({ ...note, author: note.author ?? null })
       );
@@ -28,10 +27,7 @@ export default class NoteService {
     logger.info(`Get note with req: ${JSON.stringify({ id, userId })}`);
 
     try {
-      const note = noteRepository.findById(id);
-      if (note.user_id !== userId) {
-        throw new Errors.ForbiddenAccessError();
-      }
+      const note = noteRepository.findByIdAndUserId(id, userId);
 
       return new NoteResponse(note);
     } catch (err) {

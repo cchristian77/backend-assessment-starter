@@ -6,7 +6,7 @@ import { logger } from "../utility/logger";
 
 export default class NoteRepository {
   // Code Review #4 Note Endpoint Improvement
-  findAll(userId: number): NoteWithAuthor[] {
+  findAllByUserId(userId: number): NoteWithAuthor[] {
     try {
       const data = db
         .prepare(
@@ -29,11 +29,11 @@ export default class NoteRepository {
   }
 
   // CODE REVIEW #3: SQL Injection
-  findById(id: number): Note {
+  findByIdAndUserId(id: number, userId: number): Note {
     try {
-      const data = db.prepare("SELECT * FROM notes WHERE id = ?").get(id) as
-        | NoteProps
-        | undefined;
+      const data = db
+        .prepare("SELECT * FROM notes WHERE id = ? AND user_id = ?")
+        .get(id, userId) as NoteProps | undefined;
 
       if (!data) {
         throw new Errors.NotFoundError();
@@ -41,7 +41,7 @@ export default class NoteRepository {
 
       return new Note(data);
     } catch (err) {
-      logger.error(`[REPOSITORY] find note by id error : ${err}`);
+      logger.error(`[REPOSITORY] find note by id and user id error : ${err}`);
       throw err;
     }
   }

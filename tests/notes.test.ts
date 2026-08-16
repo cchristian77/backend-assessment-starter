@@ -11,7 +11,7 @@ describe("NoteRepository", () => {
   const repository = new NoteRepository();
 
   it("throws NotFoundError when the note does not exist", () => {
-    expect(() => repository.findById(9999)).toThrow(Errors.NotFoundError);
+    expect(() => repository.findByIdAndUserId(9999, 1)).toThrow(Errors.NotFoundError);
   });
 });
 
@@ -19,13 +19,11 @@ describe("NoteService", () => {
   const service = new NoteService();
   const repository = new NoteRepository();
 
-  it("throws ForbiddenAccessError when the note belongs to another user", () => {
-    const [bobNote] = repository.findAll(2);
+  it("throws NotFoundError when the note belongs to another user", () => {
+    const [bobNote] = repository.findAllByUserId(2);
 
     expect(bobNote).toBeDefined();
-    expect(() => service.getById(bobNote.id, 1)).toThrow(
-      Errors.ForbiddenAccessError
-    );
+    expect(() => service.getById(bobNote.id, 1)).toThrow(Errors.NotFoundError);
   });
 });
 
@@ -82,7 +80,7 @@ describe("notes api", () => {
     );
   });
 
-  it("returns 403 when the note belongs to another user", async () => {
+  it("returns 404 when the note belongs to another user", async () => {
     const bobNotes = await request(app)
       .get("/notes")
       .set(bearer(bobToken))
@@ -92,11 +90,11 @@ describe("notes api", () => {
     const response = await request(app)
       .get(`/notes/${bobNoteId}`)
       .set(bearer(aliceToken))
-      .expect(403);
+      .expect(404);
 
     expect(response.headers["content-type"]).toMatch(/json/);
-    expect(response.body.status).toBe(403);
-    expect(response.body.message).toBe("Forbidden Access.");
+    expect(response.body.status).toBe(404);
+    expect(response.body.message).toBe("The requested data not found.");
   });
 
   it("returns 404 when the note does not exist", async () => {
@@ -108,6 +106,24 @@ describe("notes api", () => {
     expect(response.headers["content-type"]).toMatch(/json/);
     expect(response.body.status).toBe(404);
     expect(response.body.message).toBe("The requested data not found.");
+  });
+
+  it("returns 404 when the note id is not a number", async () => {
+    const response = await request(app)
+      .get("/notes/abc")
+      .set(bearer(aliceToken))
+      .expect(404);
+
+    expect(response.body.message).toBe("The path not found.");
+  });
+
+  it("returns 400 when the note id is less than or equal to 0", async () => {
+    const response = await request(app)
+      .get("/notes/0")
+      .set(bearer(aliceToken))
+      .expect(400);
+
+    expect(response.body.message).toBe("note id must be a valid number");
   });
 
   it("returns the note when the current user owns it", async () => {
@@ -138,7 +154,7 @@ describe("notes api", () => {
     await request(app)
       .get(`/notes/${noteId}`)
       .set(bearer(aliceToken))
-      .expect(403);
+      .expect(404);
 
     const owned = await request(app)
       .get(`/notes/${noteId}`)

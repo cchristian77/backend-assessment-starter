@@ -4,6 +4,7 @@ import NoteService from "../service/note.service";
 import { CreateNoteRequest } from "./request/note.request";
 import { SuccessResponse } from "../api/api.response";
 import { HTTPStatusCode } from "../utility/status.code";
+import Errors from "../utility/errors";
 
 const noteService = new NoteService();
 
@@ -20,7 +21,12 @@ const list = (req: Request, res: Response, next: NextFunction) => {
 
 const getById = (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Code Review #4 Note Endpoint Improvement
+    // Code Review #4 Note Endpoint
+    const noteId = Number(req.params.id)
+    if (noteId <= 0) {
+      throw new Errors.BadRequestError("note id must be a valid number");
+    }
+
     const result = noteService.getById(Number(req.params.id), req.user!.userId);
 
     return res.status(HTTPStatusCode.OK).json(new SuccessResponse(result));
@@ -48,7 +54,7 @@ const create = (req: Request, res: Response, next: NextFunction) => {
 
 const router = express.Router();
 router.get("/", list);
-router.get("/:id", getById);
+router.get("/:id(\\d+)", getById);
 router.post("/", create);
 
 export default router;
