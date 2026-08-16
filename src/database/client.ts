@@ -9,17 +9,22 @@ import { hashPassword } from "../utility/password";
 export const db = new DatabaseSync(config.dbPath);
 // export const db = new Database(config.dbPath);
 
+db.exec("PRAGMA foreign_keys = ON");
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT,
-    password TEXT
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
   );
   CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    title TEXT,
-    body TEXT
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE (user_id, title)
   );
 `);
 
