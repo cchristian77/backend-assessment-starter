@@ -186,7 +186,7 @@ Why it matters: TypeScript cannot catch missing fields, wrong column names, or a
 
 # If this API went to production tomorrow
 
-The first three things I would insist on: **(1)** parameterized queries everywhere and stop interpolating SQL — the login and notes-by-id paths are injectable today; **(2)** enforce note ownership so a valid JWT cannot read every row in `notes`; **(3)** stop shipping secrets that are not fit for production — gitignore `.env`, require a strong `JWT_SECRET` with expiry, and never return stack traces or JWTs in logs. Architecture (controllers/services/repositories, migrations, logging, CORS allowlist) should follow immediately, but those three are what actually leak data.
-
----
-
+The first three things I would work before this service is production-ready:
+1. Parameterized SQL queries to avoid string concentration in the queries to avoid SQL Injection - allows attacker to see and modify data without appropriate access.
+2. Enforce note ownership. A authenticated user currently can fetch all `notes`, including other users' private notes.
+3. Expire auth tokens and stop logging token credentials. Tokens with no expiry stay valid forever if leaked; stack traces and logged JWT tokens make that leak easier.
