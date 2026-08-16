@@ -155,4 +155,14 @@ describe("notes api", () => {
       .send({ title: "", body: "" })
       .expect(400);
   });
+
+  it("returns 409 when the title is already used by the same user", async () => {
+    const response = await request(app)
+      .post("/notes")
+      .set(bearer(aliceToken))
+      .send({ title: "Alice note", body: "another body" })
+      .expect(409);
+
+    expect(response.body.message).toBe("Title has already used");
+  });
 });

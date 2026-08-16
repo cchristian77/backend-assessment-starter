@@ -165,7 +165,9 @@ Why it matters: TypeScript cannot catch missing fields, wrong column names, or a
 
 **Problem:** `src/db.ts` runs `CREATE TABLE IF NOT EXISTS` inline on boot and seeds Alice/Bob if the users table is empty.
 
-**Why it matters**: schema changes are not versioned, so adding a column later is “edit the string and hope existing `notes.db` files still work.” Seed data is also coupled to app boot.
+**Why it matters**:
+- schema changes are not versioned and hard to track. 
+- Seed data is also coupled to app boot.
 
 **Fix:** 
 - Use a migration library to version every schema change. 
@@ -181,6 +183,16 @@ Why it matters: TypeScript cannot catch missing fields, wrong column names, or a
 **Why it matters**: local setup depends on the right Node version and native addons; a container makes the runtime reproducible for others and for a later deploy.
 
 **Fix:** Add a `Dockerfile` (and optionally `docker-compose.yml`) that builds the API.
+
+---
+
+### 5. Implement Centralized Request ID
+
+**Problem:** Logs and error responses have no request id. When something fails, there is no way to keep track from the client to the server log.
+
+**Why it matters**: All request processed within the server can be tracked through centralized request id to ease debugging production issues.
+
+**Fix:** Add middleware that reads `X-Request-Id` header or generates request id if the not included in the header, then include the request id every log in the server.
 
 ---
 

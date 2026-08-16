@@ -1,9 +1,6 @@
 // CODE REVIEW #9: Input Validation
 import Errors from "../../utility/errors";
 
-const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD_LENGTH = 6;
-
 export class LoginRequest {
   private constructor(
     public readonly email: string,
@@ -15,16 +12,18 @@ export class LoginRequest {
   public validate(): void {
     const errors: { fields: string[]; constraint: string }[] = [];
 
+    const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!this.email || !REGEX_EMAIL.test(this.email)) {
-      errors.push({ fields: ["email"], constraint: "Email is not valid" });
+      errors.push({ fields: ["email"], constraint: "Email is required and must be a valid email address." });
     }
 
+    const MIN_PASSWORD_LENGTH = 6;
     if (!this.password || this.password.length < MIN_PASSWORD_LENGTH) {
-      errors.push({ fields: ["password"], constraint: "Password is not valid" });
+      errors.push({ fields: ["password"], constraint: "Password is required and must be at least 6 characters." });
     }
 
     if (errors.length > 0) {
-      throw new Errors.BadRequestError("Bad Request. Error : Input validation error.", errors);
+      throw new Errors.BadRequestError("Input validation error.", errors);
     }
   }
 

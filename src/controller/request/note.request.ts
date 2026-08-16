@@ -13,15 +13,15 @@ export class CreateNoteRequest {
     const errors: { fields: string[]; constraint: string }[] = [];
 
     if (!this.title || this.title.trim().length === 0) {
-      errors.push({ fields: ["title"], constraint: "Title is not valid" });
+      errors.push({ fields: ["title"], constraint: "Title is required" });
     }
 
     if (!this.body || this.body.trim().length === 0) {
-      errors.push({ fields: ["body"], constraint: "Body is not valid" });
+      errors.push({ fields: ["body"], constraint: "Body is required" });
     }
 
     if (errors.length > 0) {
-      throw new Errors.BadRequestError("Error validating note data", errors);
+      throw new Errors.BadRequestError("Input validation error.", errors);
     }
   }
 

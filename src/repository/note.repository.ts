@@ -36,15 +36,22 @@ export default class NoteRepository {
   }
 
   insert(userId: number, title: string, body: string): Note {
-    const data = db
-      .prepare("INSERT INTO notes (user_id, title, body) VALUES (?, ?, ?)")
-      .run(userId, title, body);
+    try {
+      const data = db
+        .prepare("INSERT INTO notes (user_id, title, body) VALUES (?, ?, ?)")
+        .run(userId, title, body);
 
-    return new Note({
-      id: Number(data.lastInsertRowid),
-      user_id: userId,
-      title,
-      body,
-    });
+      return new Note({
+        id: Number(data.lastInsertRowid),
+        user_id: userId,
+        title,
+        body,
+      });
+    } catch (err) {
+      if (err instanceof Error && err.message.toUpperCase().includes("UNIQUE")) {
+        throw new Errors.ConflictError("Title has already used");
+      }
+      throw err;
+    }
   }
 }

@@ -2,8 +2,6 @@ import express from "express";
 import cors from "cors";
 import { requestLogger } from "../middleware/request.logger";
 import { errorHandler } from "../middleware/error.handler";
-import { HTTPStatusCode } from "../utility/status.code";
-import ApiResponse, { SuccessResponse } from "./api.response";
 import registerRouters from "./router";
 
 export const app = express();

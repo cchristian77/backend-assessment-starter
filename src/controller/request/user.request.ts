@@ -14,16 +14,16 @@ export class RegisterRequest {
 
     const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!this.email || !REGEX_EMAIL.test(this.email)) {
-      errors.push({ fields: ["email"], constraint: "Email is not valid" });
+      errors.push({ fields: ["email"], constraint: "Email is required and must be a valid email address." });
     }
 
     const MIN_PASSWORD_LENGTH = 6;
     if (!this.password || this.password.length < MIN_PASSWORD_LENGTH) {
-      errors.push({ fields: ["password"], constraint: "Password is not valid. Password must at least 6 characters." });
+      errors.push({ fields: ["password"], constraint: "Password is required and must be at least 6 characters." });
     }
 
     if (errors.length > 0) {
-      throw new Errors.BadRequestError("Error validating user data", errors);
+      throw new Errors.BadRequestError("Input validation error.", errors);
     }
   }
 
