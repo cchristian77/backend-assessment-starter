@@ -5,7 +5,7 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
   const start = Date.now();
 
   res.on("finish", () => {
-    logger.info(`[${req.method}] ${req.path} \t| ${res.statusCode} \t| ${Date.now() - start}ms`)
+    logger.info(`[${req.method}] ${req.originalUrl} \t| ${res.statusCode} \t| ${Date.now() - start}ms`)
   });
 
   next();
