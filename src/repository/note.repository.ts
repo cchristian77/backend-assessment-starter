@@ -2,37 +2,48 @@
 import { db } from "../database/client";
 import { Note, NoteProps, NoteWithAuthor } from "../domain/note";
 import Errors from "../utility/errors";
+import { logger } from "../utility/logger";
 
 export default class NoteRepository {
   // Code Review #4 Note Endpoint Improvement
   findAll(userId: number): NoteWithAuthor[] {
-    const data = db
-      .prepare(
-        `SELECT notes.id, notes.user_id, notes.title, notes.body, users.email AS author
-         FROM notes
-         LEFT JOIN users ON users.id = notes.user_id
-         WHERE notes.user_id = ?`
-      )
-      .all(userId) as NoteWithAuthor[];
+    try {
+      const data = db
+        .prepare(
+          `SELECT notes.id, notes.user_id, notes.title, notes.body, users.email AS author
+           FROM notes
+           LEFT JOIN users ON users.id = notes.user_id
+           WHERE notes.user_id = ?`
+        )
+        .all(userId) as NoteWithAuthor[];
 
-    if (!data || data.length === 0) {
-      return [];
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      return data;
+    } catch (err) {
+      logger.error(`[REPOSITORY] find notes all error : ${err}`);
+      throw err;
     }
-
-    return data;
   }
 
   // CODE REVIEW #3: SQL Injection
   findById(id: number): Note {
-    const data = db.prepare("SELECT * FROM notes WHERE id = ?").get(id) as
-      | NoteProps
-      | undefined;
+    try {
+      const data = db.prepare("SELECT * FROM notes WHERE id = ?").get(id) as
+        | NoteProps
+        | undefined;
 
-    if (!data) {
-      throw new Errors.NotFoundError();
+      if (!data) {
+        throw new Errors.NotFoundError();
+      }
+
+      return new Note(data);
+    } catch (err) {
+      logger.error(`[REPOSITORY] find note by id error : ${err}`);
+      throw err;
     }
-
-    return new Note(data);
   }
 
   insert(userId: number, title: string, body: string): Note {
@@ -48,6 +59,7 @@ export default class NoteRepository {
         body,
       });
     } catch (err) {
+      logger.error(`[REPOSITORY] insert note error : ${err}`);
       if (err instanceof Error && err.message.toUpperCase().includes("UNIQUE")) {
         throw new Errors.ConflictError("Title has already used");
       }
